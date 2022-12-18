@@ -1,9 +1,6 @@
 package br.com.crud.connection;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class ConnectionManager {
     private static final String USUARIO_BD = "seuUsuario";
@@ -39,6 +36,18 @@ public class ConnectionManager {
         if (statement != null) {
             try {
                 statement.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
+
+    public static void fecharConexao(Connection connection, Statement statement, ResultSet resultSet) {
+        fecharConexao(connection, statement);
+
+        if (resultSet != null) {
+            try {
+                resultSet.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e.getMessage());
             }
