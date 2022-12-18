@@ -24,7 +24,43 @@ public class EnderecoDAOImpl implements EnderecoDAO {
 
     @Override
     public Endereco pesquisarPorId(long id) {
-        return null;
+        Endereco enderecoEncontrado = null;
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = ConnectionManager.abrirConexao();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT " +
+                            "logradouro," +
+                            "cep, " +
+                            "numero " +
+                            "FROM endereco " +
+                            "WHERE " +
+                            "id = ?"
+            );
+
+            preparedStatement.setLong(1, id);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                enderecoEncontrado = new Endereco();
+                enderecoEncontrado.setId(id);
+                enderecoEncontrado.setLogradouro(resultSet.getString("logradouro"));
+                enderecoEncontrado.setCep(resultSet.getString("cep"));
+                enderecoEncontrado.setNumero(resultSet.getInt("numero"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionManager.fecharConexao(connection, preparedStatement, resultSet);
+        }
+
+        return enderecoEncontrado;
     }
 
     @Override
