@@ -50,7 +50,41 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public Paciente alterar(Paciente paciente) {
-        return null;
+        if (pesquisarTodos().isEmpty()) {
+            System.err.println("Sem pacientes para alterar!");
+        } else {
+            Connection connection = null;
+            PreparedStatement preparedStatement = null;
+
+            try {
+                connection = ConnectionManager.abrirConexao();
+
+                preparedStatement = connection.prepareStatement(
+                        "UPDATE paciente " +
+                                "SET " +
+                                "nome = ?," +
+                                "cpf = ?," +
+                                "nascimento = ? " +
+                                "WHERE " +
+                                "id = ?;"
+                );
+
+                preparedStatement.setString(1, paciente.getNome());
+                preparedStatement.setString(2, paciente.getCpf());
+                preparedStatement.setDate(3, Date.valueOf(paciente.getNascimento()));
+                preparedStatement.setLong(4, paciente.getId());
+
+                preparedStatement.executeUpdate();
+
+                System.out.printf("Paciente id = %d atualizado%n", paciente.getId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                ConnectionManager.fecharConexao(connection, preparedStatement);
+            }
+        }
+
+        return paciente;
     }
 
     @Override
