@@ -21,4 +21,14 @@ public class ConnectionManager {
             throw new RuntimeException("Problema de lógica ao abrir conexão: " + e.getMessage());
         }
     }
+
+    public static void fecharConexao(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+    }
 }
