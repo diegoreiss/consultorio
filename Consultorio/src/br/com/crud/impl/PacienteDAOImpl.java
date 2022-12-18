@@ -5,6 +5,7 @@ import br.com.crud.dao.PacienteDAO;
 import br.com.crud.entities.Paciente;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PacienteDAOImpl implements PacienteDAO {
@@ -59,7 +60,39 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public List<Paciente> pesquisarTodos() {
-        return null;
+        Paciente paciente;
+        List<Paciente> pacientes = new ArrayList<>();
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = ConnectionManager.abrirConexao();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * " +
+                            "FROM paciente;"
+            );
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                paciente = new Paciente();
+                paciente.setId(resultSet.getLong("id"));
+                paciente.setNome(resultSet.getString("nome"));
+                paciente.setCpf(resultSet.getString("cpf"));
+                paciente.setNascimento(resultSet.getDate("nascimento").toLocalDate());
+
+                pacientes.add(paciente);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionManager.fecharConexao(connection, preparedStatement, resultSet);
+        }
+
+        return pacientes;
     }
 
     @Override
