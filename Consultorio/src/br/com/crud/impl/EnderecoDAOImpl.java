@@ -26,7 +26,7 @@ public class EnderecoDAOImpl implements EnderecoDAO {
 
                 preparedStatement = connection.prepareStatement(
                         "INSERT INTO endereco " +
-                                "(logadouro, cep, id_paciente, numero) " +
+                                "(logradouro, cep, id_paciente, numero) " +
                                 "VALUES " +
                                 "(?, ?, ?, ?);",
                         Statement.RETURN_GENERATED_KEYS
