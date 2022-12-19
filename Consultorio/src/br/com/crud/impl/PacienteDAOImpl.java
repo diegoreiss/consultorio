@@ -171,6 +171,40 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public void excluir(long id) {
+        Paciente pacienteEncontrado = pesquisarPorId(id);
 
+        if (pacienteEncontrado != null) {
+            EnderecoDAO enderecoDAO = new EnderecoDAOImpl();
+
+            Connection connection = null;
+            PreparedStatement preparedStatement = null;
+
+            try {
+                connection = ConnectionManager.abrirConexao();
+
+                preparedStatement = connection.prepareStatement(
+                        "DELETE FROM paciente " +
+                                "WHERE " +
+                                "id = ?;"
+                );
+
+                preparedStatement.setLong(1, id);
+
+                for (Endereco enderecoPaciente : enderecoDAO.pesquisarTodosPaciente(id)) {
+                    enderecoDAO.excluir(enderecoPaciente.getId());
+                }
+
+                preparedStatement.executeUpdate();
+
+                System.out.printf("Paciente %s(id = %d) deletado do banco!",
+                        pacienteEncontrado.getNome(), id);
+            } catch (SQLException e ) {
+                e.printStackTrace();
+            } finally {
+                ConnectionManager.fecharConexao(connection, preparedStatement);
+            }
+        } else {
+            System.err.println("Não existe paciente registrado com esse id!");
+        }
     }
 }
