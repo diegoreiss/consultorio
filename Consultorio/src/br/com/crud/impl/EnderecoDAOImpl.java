@@ -2,19 +2,58 @@ package br.com.crud.impl;
 
 import br.com.crud.connection.ConnectionManager;
 import br.com.crud.dao.EnderecoDAO;
+import br.com.crud.dao.PacienteDAO;
 import br.com.crud.entities.Endereco;
+import br.com.crud.entities.Paciente;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EnderecoDAOImpl implements EnderecoDAO {
     @Override
     public void criar(Endereco endereco, long idPaciente) {
+        PacienteDAO pacienteDAO = new PacienteDAOImpl();
+        Paciente pacienteEncontrado = pacienteDAO.pesquisarPorId(idPaciente);
 
+        if (pacienteEncontrado != null) {
+            Connection connection = null;
+            PreparedStatement preparedStatement = null;
+            ResultSet resultSet = null;
+
+            try {
+                connection = ConnectionManager.abrirConexao();
+
+                preparedStatement = connection.prepareStatement(
+                        "INSERT INTO endereco " +
+                                "(logadouro, cep, id_paciente, numero) " +
+                                "VALUES " +
+                                "(?, ?, ?, ?);",
+                        Statement.RETURN_GENERATED_KEYS
+                );
+
+                preparedStatement.setString(1, endereco.getLogradouro());
+                preparedStatement.setString(2, endereco.getCep());
+                preparedStatement.setLong(3, idPaciente);
+                preparedStatement.setInt(4, endereco.getNumero());
+
+                preparedStatement.executeUpdate();
+                resultSet = preparedStatement.getGeneratedKeys();
+
+                while (resultSet.next()) {
+                    endereco.setId(resultSet.getInt(1));
+                }
+
+                System.out.printf("Endereço %s(id = %d) cadastrado no registro do paciente %s(id_paciente = %d)%n",
+                        endereco.getLogradouro(), endereco.getId(), pacienteEncontrado.getNome(), pacienteEncontrado.getId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                ConnectionManager.fecharConexao(connection, preparedStatement, resultSet);
+            }
+        } else {
+            System.err.println("Não existe paciente cadastrado com esse id!");
+        }
     }
 
     @Override
