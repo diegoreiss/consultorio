@@ -174,6 +174,33 @@ public class EnderecoDAOImpl implements EnderecoDAO {
 
     @Override
     public void excluir(long id) {
+        Endereco enderecoEncontrado = pesquisarPorId(id);
 
+        if (enderecoEncontrado != null) {
+            Connection connection = null;
+            PreparedStatement preparedStatement = null;
+
+            try {
+                connection = ConnectionManager.abrirConexao();
+                preparedStatement = connection.prepareStatement(
+                        "DELETE FROM endereco " +
+                                "WHERE " +
+                                "id = ?;"
+                );
+
+                preparedStatement.setLong(1, id);
+
+                preparedStatement.executeUpdate();
+
+                System.out.printf("Endereço %s(id = %d) deletado!%n",
+                        enderecoEncontrado.getLogradouro(), enderecoEncontrado.getId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                ConnectionManager.fecharConexao(connection, preparedStatement);
+            }
+        } else {
+            System.err.println("Não existe endereço registrado com esse id!");
+        }
     }
 }
