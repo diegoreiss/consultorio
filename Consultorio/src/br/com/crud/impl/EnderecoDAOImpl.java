@@ -58,7 +58,37 @@ public class EnderecoDAOImpl implements EnderecoDAO {
 
     @Override
     public Endereco alterar(Endereco endereco) {
-        return null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = ConnectionManager.abrirConexao();
+
+            preparedStatement = connection.prepareStatement(
+                    "UPDATE endereco " +
+                            "SET " +
+                            "logradouro = ?, " +
+                            "cep = ?, " +
+                            "numero = ? " +
+                            "WHERE " +
+                            "id = ?"
+            );
+
+            preparedStatement.setString(1, endereco.getLogradouro());
+            preparedStatement.setString(2, endereco.getCep());
+            preparedStatement.setInt(3, endereco.getNumero());
+            preparedStatement.setLong(4, endereco.getId());
+
+            preparedStatement.executeUpdate();
+
+            System.out.printf("Endereço id = %d atualizado%n", endereco.getId());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ConnectionManager.fecharConexao(connection, preparedStatement);
+        }
+
+        return endereco;
     }
 
     @Override
