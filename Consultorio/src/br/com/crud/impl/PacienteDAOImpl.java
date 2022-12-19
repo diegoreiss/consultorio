@@ -1,7 +1,9 @@
 package br.com.crud.impl;
 
 import br.com.crud.connection.ConnectionManager;
+import br.com.crud.dao.EnderecoDAO;
 import br.com.crud.dao.PacienteDAO;
+import br.com.crud.entities.Endereco;
 import br.com.crud.entities.Paciente;
 
 import java.sql.*;
@@ -89,7 +91,45 @@ public class PacienteDAOImpl implements PacienteDAO {
 
     @Override
     public Paciente pesquisarPorId(long id) {
-        return null;
+        EnderecoDAO enderecoDAO = new EnderecoDAOImpl();
+
+        Paciente paciente = null;
+        List<Endereco> enderecosPaciente = enderecoDAO.pesquisarTodosPaciente(id);
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = ConnectionManager.abrirConexao();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT " +
+                            "nome, cpf, nascimento " +
+                            "FROM paciente " +
+                            "WHERE " +
+                            "id = ?;"
+            );
+
+            preparedStatement.setLong(1, id);
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                paciente = new Paciente();
+                paciente.setId(id);
+                paciente.setNome(resultSet.getString("nome"));
+                paciente.setCpf(resultSet.getString("cpf"));
+                paciente.setNascimento(resultSet.getDate("nascimento").toLocalDate());
+                paciente.setEnderecos(enderecosPaciente);
+            }
+        } catch (SQLException e ) {
+            e.printStackTrace();
+        } finally {
+            ConnectionManager.fecharConexao(connection, preparedStatement, resultSet);
+        }
+
+        return paciente;
     }
 
     @Override
